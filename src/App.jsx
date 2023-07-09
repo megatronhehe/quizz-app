@@ -48,7 +48,6 @@ function App() {
 	};
 
 	const pickAnswer = (quizId, answer) => {
-		const thisQuiz = allQuizData.find((quiz) => quiz.id === quizId);
 		setUserAnswersData((prev) => {
 			return prev.map((item) =>
 				item.id === quizId ? { ...item, answer: answer } : item
@@ -68,7 +67,6 @@ function App() {
 			(item) => item.correct_answer
 		);
 		const userAnswer = userAnswersData.map((item) => item.answer);
-
 		const countScore = correctAnswerArray.reduce(
 			(a, c) => a + userAnswer.includes(c),
 			0
@@ -77,16 +75,25 @@ function App() {
 	};
 
 	const quizzesElement = allQuizData.map((quiz, i) => {
+		const thisQuizCorrectAnswer = quizDataCorrectAnswer.find(
+			(item) => item.id === quiz.id
+		);
 		const quizAnswersElement = quiz.all_answers.map((answer, i) => {
-			const selectedElement = userAnswersData.some(
-				(item) => item.answer === answer
-			);
+			const selected = userAnswersData.some((item) => item.answer === answer);
+
+			const highlightCorrectAnswerElement =
+				thisQuizCorrectAnswer.correct_answer === answer;
+			// IF this particular answer is the same as the correct answer ? highlight it
 
 			return (
 				<button
-					className={`p-3 flex justfy-center border border-blue-400 rounded-xl ${
-						selectedElement ? "bg-blue-400 text-white border-white" : ""
-					}`}
+					className={`p-3 flex justfy-center border border-blue-400 rounded-xl 
+						${selected ? "bg-blue-400 text-white border-white" : ""}
+						${
+							showResult && highlightCorrectAnswerElement
+								? "bg-green-400 border-white text-white"
+								: ""
+						}`}
 					disabled={showResult}
 					onClick={() => pickAnswer(quiz.id, answer)}
 					key={i}
@@ -108,9 +115,11 @@ function App() {
 				<ul className="flex items-center justify-between text-xs text-blue-500">
 					{quizAnswersElement}
 				</ul>
-				<p className="absolute flex items-center justify-center w-12 h-12 font-semibold text-blue-500 bg-white border-2 border-blue-400 -top-7 rounded-xl">
-					{i + 1}
-				</p>
+				<div className="absolute flex gap-4 -top-6">
+					<p className="flex items-center justify-center w-12 h-12 font-semibold text-blue-500 bg-white border-2 border-blue-400 rounded-xl">
+						{i + 1}
+					</p>
+				</div>
 			</div>
 		);
 	});
