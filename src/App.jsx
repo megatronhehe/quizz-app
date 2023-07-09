@@ -13,17 +13,11 @@ function App() {
 		correct_answer: quiz.correct_answer,
 	}));
 
-	const compareAnswer = () => {
-		const correctAnswerArray = quizDataCorrectAnswer.map(
-			(item) => item.correct_answer
-		);
-		const userAnswer = userAnswersData.map((item) => item.answer);
-
-		const countScore = correctAnswerArray.reduce(
-			(a, c) => a + userAnswer.includes(c),
-			0
-		);
-		return countScore;
+	const shuffleArray = (array) => {
+		return array
+			.map((value) => ({ value, sort: Math.random() }))
+			.sort((a, b) => a.sort - b.sort)
+			.map(({ value }) => value);
 	};
 
 	const getAPI = () => {
@@ -37,7 +31,16 @@ function App() {
 					data.results.map((item, i) => ({
 						...item,
 						id: i,
-						all_answers: [...item.incorrect_answers, item.correct_answer],
+						all_answers: shuffleArray([
+							...item.incorrect_answers,
+							item.correct_answer,
+						]),
+					}))
+				);
+				setUserAnswersData(
+					data.results.map((item, i) => ({
+						id: i,
+						answer: "",
 					}))
 				);
 				setLoading(false);
@@ -46,18 +49,10 @@ function App() {
 
 	const pickAnswer = (quizId, answer) => {
 		const thisQuiz = allQuizData.find((quiz) => quiz.id === quizId);
-
-		const thisQuizModified = { id: thisQuiz.id, answer: answer };
-
 		setUserAnswersData((prev) => {
-			const isExist = prev.some((item) => item.id === quizId);
-			if (isExist) {
-				return prev.map((item) =>
-					item.id === quizId ? { ...item, answer: answer } : item
-				);
-			} else {
-				return [...prev, thisQuizModified];
-			}
+			return prev.map((item) =>
+				item.id === quizId ? { ...item, answer: answer } : item
+			);
 		});
 	};
 
@@ -66,6 +61,19 @@ function App() {
 		setShowResult(false);
 		setAllQuizData([]);
 		setUserAnswersData([]);
+	};
+
+	const compareAnswer = () => {
+		const correctAnswerArray = quizDataCorrectAnswer.map(
+			(item) => item.correct_answer
+		);
+		const userAnswer = userAnswersData.map((item) => item.answer);
+
+		const countScore = correctAnswerArray.reduce(
+			(a, c) => a + userAnswer.includes(c),
+			0
+		);
+		return countScore;
 	};
 
 	const quizzesElement = allQuizData.map((quiz, i) => {
@@ -91,16 +99,16 @@ function App() {
 		return (
 			<div
 				key={quiz.id}
-				className="relative mt-14 border p-4 rounded-xl shadow-sm"
+				className="relative p-4 border shadow-sm mt-14 rounded-xl"
 			>
-				<h1 className="text-gray-500 mb-6 font-semibold border-b py-4">
+				<h1 className="py-4 mb-6 font-semibold text-gray-500 border-b">
 					{quiz.question}
 				</h1>
 
-				<ul className="text-blue-500 text-xs flex justify-between items-center">
+				<ul className="flex items-center justify-between text-xs text-blue-500">
 					{quizAnswersElement}
 				</ul>
-				<p className="absolute w-12 h-12 text-blue-500 bg-white  border-2 border-blue-400 -top-7 rounded-xl flex items-center justify-center font-semibold">
+				<p className="absolute flex items-center justify-center w-12 h-12 font-semibold text-blue-500 bg-white border-2 border-blue-400 -top-7 rounded-xl">
 					{i + 1}
 				</p>
 			</div>
@@ -109,28 +117,30 @@ function App() {
 
 	return (
 		<>
-			<h1 className="text-center py-4 bg-blue-400 text-xl text-white tracking-widest">
-				Quiz.<span className="text-blue-700 font-semibold">ez</span>
+			<h1 className="py-4 text-xl tracking-widest text-center text-white bg-blue-400">
+				Quiz.<span className="font-semibold text-blue-700">ez</span>
 			</h1>
 			{startQuiz ? (
 				loading ? (
-					<div className="text-center mt-32 text-gray-400">
+					<div className="mt-32 text-center text-gray-400">
 						<p>loading. . .</p>
 					</div>
 				) : (
-					<div>
-						<div className="p-8">{quizzesElement}</div>
-						<div className="text-center py-8 flex justify-between px-14">
-							<p>
-								{showResult &&
-									`your score is ${compareAnswer()} / ${allQuizData.length}`}
-							</p>
-							<button
-								onClick={showResult ? startOver : () => setShowResult(true)}
-								className="w-1/3 font-semibold bg-lime-400 shadow-md p-4 rounded-xl text-white"
-							>
-								{showResult ? "Back to Menu" : "Submit"}
-							</button>
+					<div className="flex justify-center text-center">
+						<div className="w-full max-w-4xl">
+							<div className="p-8">{quizzesElement}</div>
+							<div className="flex justify-between py-8 text-center px-14">
+								<p>
+									{showResult &&
+										`your score is ${compareAnswer()} / ${allQuizData.length}`}
+								</p>
+								<button
+									onClick={showResult ? startOver : () => setShowResult(true)}
+									className="w-1/3 p-4 font-semibold text-white shadow-md bg-lime-400 rounded-xl"
+								>
+									{showResult ? "Back to Menu" : "Submit"}
+								</button>
+							</div>
 						</div>
 					</div>
 				)
@@ -142,13 +152,13 @@ function App() {
 						getAPI();
 					}}
 				>
-					<h1 className="text-blue-400 font-semibold tracking-widest text-xl mb-4">
+					<h1 className="mb-4 text-xl font-semibold tracking-widest text-blue-400">
 						Quiz.ez
 					</h1>
 					<p className="mb-12 text-gray-500">
 						Test your general knowledge by answering little quizzes yes?
 					</p>
-					<button className="bg-lime-400 p-4 m text-white font-semibold rounded-xl show-sm">
+					<button className="p-4 font-semibold text-white bg-lime-400 m rounded-xl show-sm">
 						start quiz!
 					</button>
 				</div>
