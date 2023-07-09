@@ -2,16 +2,29 @@ import React, { useState, useEffect } from "react";
 
 function App() {
 	const [allQuizData, setAllQuizData] = useState([]);
-
 	const [userAnswersData, setUserAnswersData] = useState([]);
 
 	const [startQuiz, setStartQuiz] = useState(false);
+	const [showResult, setShowResult] = useState(false);
 	const [loading, setLoading] = useState(false);
 
 	const quizDataCorrectAnswer = allQuizData.map((quiz) => ({
 		id: quiz.id,
 		correct_answer: quiz.correct_answer,
 	}));
+
+	const compareAnswer = () => {
+		const correctAnswerArray = quizDataCorrectAnswer.map(
+			(item) => item.correct_answer
+		);
+		const userAnswer = userAnswersData.map((item) => item.answer);
+
+		const countScore = correctAnswerArray.reduce(
+			(a, c) => a + userAnswer.includes(c),
+			0
+		);
+		return countScore;
+	};
 
 	const getAPI = () => {
 		setLoading(true);
@@ -31,8 +44,6 @@ function App() {
 			});
 	};
 
-	console.log(userAnswersData);
-
 	const pickAnswer = (quizId, answer) => {
 		const thisQuiz = allQuizData.find((quiz) => quiz.id === quizId);
 
@@ -50,6 +61,13 @@ function App() {
 		});
 	};
 
+	const startOver = () => {
+		setStartQuiz(false);
+		setShowResult(false);
+		setAllQuizData([]);
+		setUserAnswersData([]);
+	};
+
 	const quizzesElement = allQuizData.map((quiz, i) => {
 		const quizAnswersElement = quiz.all_answers.map((answer, i) => {
 			const selectedElement = userAnswersData.some(
@@ -57,15 +75,16 @@ function App() {
 			);
 
 			return (
-				<li
+				<button
 					className={`p-3 flex justfy-center border border-blue-400 rounded-xl ${
 						selectedElement ? "bg-blue-400 text-white border-white" : ""
 					}`}
+					disabled={showResult}
 					onClick={() => pickAnswer(quiz.id, answer)}
 					key={i}
 				>
 					{answer}
-				</li>
+				</button>
 			);
 		});
 
@@ -101,9 +120,16 @@ function App() {
 				) : (
 					<div>
 						<div className="p-8">{quizzesElement}</div>
-						<div className="text-center py-8">
-							<button className="font-semibold bg-lime-400 shadow-md p-4 rounded-xl text-white">
-								Submit
+						<div className="text-center py-8 flex justify-between px-14">
+							<p>
+								{showResult &&
+									`your score is ${compareAnswer()} / ${allQuizData.length}`}
+							</p>
+							<button
+								onClick={showResult ? startOver : () => setShowResult(true)}
+								className="w-1/3 font-semibold bg-lime-400 shadow-md p-4 rounded-xl text-white"
+							>
+								{showResult ? "Back to Menu" : "Submit"}
 							</button>
 						</div>
 					</div>
