@@ -78,22 +78,21 @@ function App() {
 		const thisQuizCorrectAnswer = quizDataCorrectAnswer.find(
 			(item) => item.id === quiz.id
 		);
+		let isUserCorrect;
 		const quizAnswersElement = quiz.all_answers.map((answer, i) => {
-			const selected = userAnswersData.some((item) => item.answer === answer);
+			const isSelected = userAnswersData.some((item) => item.answer === answer);
 
-			const highlightCorrectAnswerElement =
-				thisQuizCorrectAnswer.correct_answer === answer;
-			// IF this particular answer is the same as the correct answer ? highlight it
+			const correctAnswer = thisQuizCorrectAnswer.correct_answer === answer;
+
+			isUserCorrect = userAnswersData.some(
+				(item) => item.answer === thisQuizCorrectAnswer.correct_answer
+			);
 
 			return (
 				<button
 					className={`p-3 flex justfy-center border border-blue-400 rounded-xl 
-						${selected ? "bg-blue-400 text-white border-white" : ""}
-						${
-							showResult && highlightCorrectAnswerElement
-								? "bg-green-400 border-white text-white"
-								: ""
-						}`}
+						${isSelected ? "bg-blue-400 text-white border-white" : ""}
+						${showResult && correctAnswer ? "bg-green-400 border-white text-white" : ""}`}
 					disabled={showResult}
 					onClick={() => pickAnswer(quiz.id, answer)}
 					key={i}
@@ -119,6 +118,7 @@ function App() {
 					<p className="flex items-center justify-center w-12 h-12 font-semibold text-blue-500 bg-white border-2 border-blue-400 rounded-xl">
 						{i + 1}
 					</p>
+					<p>{showResult ? (isUserCorrect ? "v" : "x") : ""}</p>
 				</div>
 			</div>
 		);
@@ -145,7 +145,9 @@ function App() {
 								</p>
 								<button
 									onClick={showResult ? startOver : () => setShowResult(true)}
-									className="w-1/3 p-4 font-semibold text-white shadow-md bg-lime-400 rounded-xl"
+									className={`w-1/3 p-4 font-semibold text-white bg-green-400 shadow-md rounded-xl ${
+										showResult ? "bg-blue-500" : ""
+									}`}
 								>
 									{showResult ? "Back to Menu" : "Submit"}
 								</button>
@@ -167,7 +169,7 @@ function App() {
 					<p className="mb-12 text-gray-500">
 						Test your general knowledge by answering little quizzes yes?
 					</p>
-					<button className="p-4 font-semibold text-white bg-lime-400 m rounded-xl show-sm">
+					<button className="p-4 font-semibold text-white bg-green-400 m rounded-xl show-sm">
 						start quiz!
 					</button>
 				</div>
