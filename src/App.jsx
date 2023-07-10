@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 
+import { RxCross2, RxCheck } from "react-icons/rx";
+
 function App() {
 	const [allQuizData, setAllQuizData] = useState([]);
 	const [userAnswersData, setUserAnswersData] = useState([]);
@@ -114,11 +116,21 @@ function App() {
 				<ul className="flex items-center justify-between text-xs text-blue-500">
 					{quizAnswersElement}
 				</ul>
-				<div className="absolute flex gap-4 -top-6">
+				<div className="absolute flex items-center gap-4 -top-6">
+					<p>
+						{showResult ? (
+							isUserCorrect ? (
+								<RxCheck color="lime" size="30" />
+							) : (
+								<RxCross2 color="red" size="30" />
+							)
+						) : (
+							""
+						)}
+					</p>
 					<p className="flex items-center justify-center w-12 h-12 font-semibold text-blue-500 bg-white border-2 border-blue-400 rounded-xl">
 						{i + 1}
 					</p>
-					<p>{showResult ? (isUserCorrect ? "v" : "x") : ""}</p>
 				</div>
 			</div>
 		);
