@@ -22,31 +22,37 @@ function App() {
 			.map(({ value }) => value);
 	};
 
-	const getAPI = () => {
-		setLoading(true);
-		fetch(
-			"https://opentdb.com/api.php?amount=5&category=11&difficulty=easy&type=multiple"
-		)
-			.then((res) => res.json())
-			.then((data, i) => {
-				setAllQuizData(
-					data.results.map((item, i) => ({
-						...item,
-						id: i,
-						all_answers: shuffleArray([
-							...item.incorrect_answers,
-							item.correct_answer,
-						]),
-					}))
-				);
-				setUserAnswersData(
-					data.results.map((item, i) => ({
-						id: i,
-						answer: "",
-					}))
-				);
-				setLoading(false);
-			});
+	const getAPI = async () => {
+		try {
+			setLoading(true);
+			const response = await fetch(
+				"https://opentdb.com/api.php?amount=5&category=11&difficulty=easy&type=multiple"
+			);
+			if (!response.ok) {
+				throw new Error("Failed to fetch API");
+			}
+			const data = await response.json();
+			setAllQuizData(
+				data.results.map((item, i) => ({
+					...item,
+					id: i,
+					all_answers: shuffleArray([
+						...item.incorrect_answers,
+						item.correct_answer,
+					]),
+				}))
+			);
+			setUserAnswersData(
+				data.results.map((item, i) => ({
+					id: i,
+					answer: "",
+				}))
+			);
+		} catch (error) {
+			console.error("Error fetching API:", error);
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	const pickAnswer = (quizId, answer) => {
@@ -117,6 +123,9 @@ function App() {
 					{quizAnswersElement}
 				</ul>
 				<div className="absolute flex items-center gap-4 -top-6">
+					<p className="flex items-center justify-center w-12 h-12 font-semibold text-blue-500 bg-white border-2 border-blue-400 rounded-xl">
+						{i + 1}
+					</p>
 					<p>
 						{showResult ? (
 							isUserCorrect ? (
@@ -127,9 +136,6 @@ function App() {
 						) : (
 							""
 						)}
-					</p>
-					<p className="flex items-center justify-center w-12 h-12 font-semibold text-blue-500 bg-white border-2 border-blue-400 rounded-xl">
-						{i + 1}
 					</p>
 				</div>
 			</div>
